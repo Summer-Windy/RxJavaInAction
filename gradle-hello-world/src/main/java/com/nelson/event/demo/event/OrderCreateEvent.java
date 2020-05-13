@@ -5,7 +5,6 @@ import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Created by wanggenshen
  * Date: on 2019/11/22 23:43.
  * Description: 订单创建事件
  */

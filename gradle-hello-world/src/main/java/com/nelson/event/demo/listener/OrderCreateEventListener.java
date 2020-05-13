@@ -7,7 +7,6 @@ import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by wanggenshen
  * Date: on 2019/11/22 23:51.
  * Description: 订单创建监听器
  */

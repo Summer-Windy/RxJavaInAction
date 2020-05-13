@@ -9,7 +9,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.Executor;
 
 /**
- * Created by wanggenshen
  * Date: on 2019/11/23 00:22.
  * Description: 异步线程池配置
  */

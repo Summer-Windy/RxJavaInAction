@@ -8,9 +8,10 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.stereotype.Service;
 
 /**
- * Created by wanggenshen
- * Date: on 2019/11/22 23:47.
- * Description: Spring实现的事件发布
+ *
+ * Spring实现的事件发布
+ *
+ * @author nelson
  */
 @Service("springEventPublishService")
 public class SpringEventPublishServiceImpl implements EventPublishService<ApplicationEvent>, ApplicationContextAware {

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 /**
- * Created by wanggenshen
  * Date: on 2019/11/22 23:40.
  * Description: XXX
  */

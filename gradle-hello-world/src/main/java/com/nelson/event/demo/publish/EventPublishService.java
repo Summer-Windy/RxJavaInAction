@@ -1,9 +1,9 @@
 package com.nelson.event.demo.publish;
 
 /**
- * Created by wanggenshen
- * Date: on 2019/11/22 23:46.
- * Description: 事件发布
+ * nelson
+ *
+ * @param <T>
  */
 public interface EventPublishService<T> {
 
