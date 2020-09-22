@@ -1,0 +1,25 @@
+
+@startuml
+title 注册识别流程
+
+GW -> Biz:idst.reconginze
+==显式注册==
+GW -> idst: idst.register(groupId,deviceType,urls,userId,implicit);
+idst --> GW: 成功
+GW -> idst: compare(userId)
+idst -->
+
+
+==隐式注册==
+idst --> GW: GW.register(groupId,deviceType,urls)
+GW -> idst: idst.compareByUrls(groupId,urls,implicit);
+idst --> GW: L
+GW -> UserCenter: createMember()
+GW -> idst: idst.register(groupId,deviceType,urls,userId,implicit);
+idst --> GW: success
+
+idst --> GW: List<userId>
+GW -> GW:
+
+
+@enduml

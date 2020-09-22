@@ -1,0 +1,10 @@
+@startuml
+(*)  --> "主动唤醒 声纹识别"
+If "非注册声纹用户 也进行识别开关" then
+--> [Yes] "异步上传到"
+--> "run command"
+else
+--> "run command"
+Endif
+-->(*)
+@enduml

@@ -1,0 +1,38 @@
+@startuml
+participant "launcher" as test order 1
+participant GW order 2
+participant "OSUpdateClient" as OSClient order 21
+participant "OSUpdateServer" as OSUpdate order 23
+participant DeviceCenter order 8
+title : OTA升级方式
+launcher -> GW : 1.1 查询模式 uuid
+GW -> DeviceCenter : 1.2 子设备类型
+ref over GW
+    查询uuid的设备信息
+    定制机类型 单\双模式 appList 最低版本
+end ref
+launcher <- GW : 1.3 定制机类型 单\双模式 appList 最低版本 launcher
+ref over launcher
+    没有最低版本 || 小于等于最低版本：ota升级
+    appList不一致：appList升级
+end ref
+launcher -> OSClient : 2 双模式通知、单模式跳过、自研跳过
+GW <- OSClient : 3.1 查询版本
+GW -> OSClient : 3.2 定制机类型 单\双模式 appList 最低版本
+OSClient -> OSUpdate : 4 OTA版本下载
+ref over OSClient
+    Ota的升级
+    appList的升级
+end ref
+launcher <--> OSClient : 5 超时配置、升级状态同步接口
+launcher <- OSClient : 6 升级完成
+ref over launcher
+    appList的对比
+    切换launcher启动
+end ref
+launcher -> launcher : 7
+@enduml
+
+
+
+

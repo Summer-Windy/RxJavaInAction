@@ -1,0 +1,175 @@
+@startuml
+title: 图兰朵 普通声纹注册流程
+== 注册流程==
+图兰朵 -> AppServer: 注册声纹
+AppServer -> UserCenter:
+AppServer <-- UserCenter: memberId(声纹Id)
+图兰朵 <-- AppServer:
+UserCenter -> GW: 进入声纹注册流程
+图兰朵 <-- GW: 开始注册声纹
+note left: 图兰朵播放tts \n 开麦
+图兰朵 -> GW: 天猫精灵
+== 注册成功 ==
+图兰朵 <--> GW:
+...GW 控制获取2次音频...
+UserCenter <- GW: 写入注册成功
+== 注册失败 ==
+图兰朵 <--> GW:
+...GW 控制失败3次重试...
+UserCenter <- GW: 写入注册失败
+== 取消==
+图兰朵 -> AppServer:取消
+AppServer -> UserCenter:取消
+note right: 更新注册状态
+UserCenter -> GW: 取消
+== 图兰朵状态切换==
+图兰朵 -> AppServer: 轮训注册结果
+AppServer -> UserCenter : 轮训注册结果
+AppServer <-- UserCenter: 注册结果
+图兰朵 <-- AppServer: 注册结果
+note left: 结束
+@enduml
+
+
+
+@startuml
+title: 图兰朵 支付声纹注册流程
+== 注册流程==
+图兰朵 -> AppServer: 注册支付声纹
+AppServer -> UserCenter:
+note right: 随机code
+AppServer <-- UserCenter: memberId(声纹Id)  code
+图兰朵 <-- AppServer:
+UserCenter -> GW: 进入支付声纹注册流程
+图兰朵 <-- GW: 开始注册声纹
+note left: 图兰朵播放tts \n 开麦
+图兰朵 -> GW: 天猫精灵 + code
+== 注册成功 ==
+图兰朵 <--> GW:
+...GW 控制获取2次音频...
+图兰朵 <-- GW: 我正在熟悉你的声音
+UserCenter <- GW: 异步写入注册成功
+图兰朵 <-- GW: 已经开通声纹购
+== 注册失败 ==
+图兰朵 <--> GW:
+...GW控制失败3次重试...
+UserCenter <- GW: 写入注册失败
+图兰朵 <-- GW:请到手机重启注册流程
+== 取消==
+图兰朵 -> AppServer:取消
+AppServer -> UserCenter:取消
+note right: 更新注册状态
+UserCenter -> GW: 取消
+图兰朵 <-- GW: 声纹流程已退出
+== 图兰朵状态切换==
+图兰朵 -> AppServer: 轮训注册结果
+AppServer -> UserCenter : 轮训注册结果
+AppServer <-- UserCenter: 注册结果
+图兰朵 <-- AppServer: 注册结果
+note left: 结束
+@enduml
+
+
+
+@startuml
+title: 图兰朵 声纹购 流程
+== 注册流程==
+图兰朵 -> IDE: 下单(instruction)
+IDE -> 购物领域:
+购物领域 -> GW: 进入支付流程
+购物领域 <-- GW: code
+IDE <-- 购物领域:
+图兰朵 <-- IDE: actions(reply code 开麦)
+
+图兰朵 -> GW:reply(获取tts)
+图兰朵 <-- GW: tts
+
+图兰朵 -> GW: 天猫精灵 + code
+==验证成功==
+图兰朵 <--> GW:
+...code一致...
+图兰朵 -> GW:
+IDE <- GW: 验证结果()
+IDE -> 购物领域:分发
+IDE <-- 购物领域: reply
+IDE --> GW: reply
+图兰朵 <-- GW:
+== 语音退出 ==
+图兰朵 -> GW: "退出/不要了..."
+IDE <- GW: 退出
+IDE -> 购物领域:
+IDE <-- 购物领域:
+IDE --> GW:
+图兰朵 <-- GW:
+== 页面点击取消==
+图兰朵 -> IDE:点击取消
+IDE -> 购物领域:
+购物领域 -> GW: 取消支付流程
+@enduml
+
+
+
+
+
+
+@startuml
+AppServer -> UserCenter:1注册
+AppServer <-- UserCenter: memberId
+AppServer -> GW: 2 NotifyDevicePushServiceImpl
+note right:startVpRegister:(memberName memberId)
+GW -> GW:3 DevicePushServcieImpl
+GW -> GW:4 BizPushEventServiceImpl
+GW -> GW:5 StartVpRegisterPushEventHandler
+GW -> 图兰朵:6 声纹注册
+GW <-- 图兰朵:7 "天猫精灵"
+GW -> 图兰朵:8 再次注册
+GW <-- 图兰朵:9 "天猫精灵"
+...最多失败3次...
+GW -> 图兰朵: 注册成功
+AppServer -> GW: 轮询DB？要问侠行 获取注册状态
+== 开启声纹购 ==
+AppServer -> UserCenter:1 开启声纹购 memberId memberName
+AppServer -> GW:2 NotifyDevicePushServiceImpl
+note right:startVpPayRegister:(payCode memberId) \n声纹购注册流程 VP_PAYREG
+GW -> 图兰朵: DevicePushServiceImpl
+
+== 结束流程==
+AppServer -> GW: NotifyDevicePushServiceImpl
+note right:cancelVpRegister
+GW -> 图兰朵: 结束
+@enduml
+
+
+
+
+
+
+@startuml
+
+title: 声纹的注册流程
+== 注册流程==
+AppServer -> UserCenter:1注册
+AppServer <-- UserCenter: memberId
+AppServer -> GW: 2 NotifyDevicePushServiceImpl
+note right:startVpRegister:(memberName memberId)
+GW -> GW:3 DevicePushServcieImpl
+GW -> GW:4 BizPushEventServiceImpl
+GW -> GW:5 StartVpRegisterPushEventHandler
+GW -> X1:6 声纹注册
+GW <-- X1:7 "天猫精灵"
+GW -> X1:8 再次注册
+GW <-- X1:9 "天猫精灵"
+...最多失败3次...
+GW -> X1: 注册成功
+AppServer -> GW: 轮询DB？要问侠行 获取注册状态
+== 开启声纹购 ==
+AppServer -> UserCenter:1 开启声纹购 memberId memberName
+AppServer -> GW:2 NotifyDevicePushServiceImpl
+note right:startVpPayRegister:(payCode memberId) \n声纹购注册流程 VP_PAYREG
+GW -> X1: DevicePushServiceImpl
+
+== 结束流程==
+AppServer -> GW: NotifyDevicePushServiceImpl
+note right:cancelVpRegister
+GW -> X1: 结束
+@enduml

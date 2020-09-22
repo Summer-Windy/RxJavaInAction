@@ -1,0 +1,9 @@
+@startuml
+UC -> GW
+GW -> IDST:
+note left IDST:sd
+
+GW -> IDST
+
+
+@enduml

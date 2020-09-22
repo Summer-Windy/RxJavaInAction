@@ -1,0 +1,9 @@
+@startuml
+X1 -> GW:EventNs.EventName
+GW -> Biz:BizEventService.doHandleEvent
+Biz -> Biz: EventHandler implement GatewayEventHandler extends AbstractNluEventHandler
+Biz -> Coin: AbstractNluEvent.executeNluAndTts()
+Biz --> GW:GatewayEventContext
+GW -> GW: GatewayEventContext.commands
+GW --> X1:commands
+@enduml

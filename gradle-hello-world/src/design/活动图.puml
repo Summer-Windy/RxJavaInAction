@@ -1,0 +1,20 @@
+@startuml
+start
+:变更需求;
+:功能开发;
+
+while ( 日常验证通过？) is (否)
+  :修复问题;
+endwhile (是)
+while ( 预发验证通过？) is (否)
+  :修复问题;
+endwhile (是)
+:预发验证通过？;
+partition 灰度阶段 {
+	while ( 发布灰度&切流验证？) is (否)
+      :断流&修复问题;
+    endwhile (是)
+}
+:正式发布;
+stop
+@enduml

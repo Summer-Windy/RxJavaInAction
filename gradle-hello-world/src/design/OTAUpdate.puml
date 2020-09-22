@@ -1,0 +1,55 @@
+
+@startuml
+title OTA Update 查询升级
+== 查询服务==
+自研产品 -> GW:/device/api/queryOtaUpdate
+note left:没有开放能力\n第三方需要自建升级渠道理
+GW -> OsUpdate:query
+GW -> GW:创建TaskId
+OsUpdate --> GW:Ota info
+GW --> 自研产品:Ota info
+
+自研产品 -> GW:system.otaUpgradeResult \n 汇报升级的状态
+note left: 端上进行下载 校验 安装等操作 \n 1DOWNLOADING \n 2UPGRADING \n 3INSTALLING
+GW -> GW: 更新Task的状态
+@enduml
+
+@startuml
+title APP OTA升级
+== 查询服务==
+APP -> GW: 查询设备是否在升级中 \nqueryOtaUpgradeTaskInProc
+note left:OtaUpgradeService
+APP <-- GW: 是否升级中
+APP -> GW: 查询要升级的版本 \nqueryOtaVersion
+APP <-- GW: 版本
+APP -> GW: 发送升级command \nforceOtaUpgrade
+GW -> 设备: 创建TaskId 发送升级指令 system.otaUpdate
+
+GW <-- 设备: 上报升级的状态
+note left GW: 根据TaskId更新状态
+GW -> GW: 更新任务的状态
+...设备重启完成...
+GW <- 设备: statusSync 上报升级状态
+
+APP <- GW: 发送升级的结果状态
+note left: 升级成功 或 失败
+== Task 任务超时==
+note right GW:OtaTaskTimeoutTimer 超过5分钟任务失效
+APP <- GW: 超时发送消息
+note left APP: APP升级超时
+@enduml
+
+@startuml
+title OS Update 推送升级
+
+OSUpdate -> GW: UUIDs(bizType bizGroup)
+note left:OtaPushMetaqConsumer
+GW -> GW: 推送升级任务到GW pushEvent
+==方式一 云端查询OTA包并下发指令==
+OSUpdate <- GW: 查询是否有升级版本  checkOSUpdate2OtaUpdate
+OSUpdate --> GW: 要升级的版本
+GW -> 设备: system.otaUpdate
+==方式二 通知端上自己查询==
+GW -> 设备: system.notifyOtaUpdate
+GW <-- 设备: /device/api/queryOtaUpdate
+@enduml

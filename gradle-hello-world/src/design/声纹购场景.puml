@@ -1,0 +1,144 @@
+
+@startuml
+title : X1声纹购调用流程
+X1 -> GW: 1 我要买牛奶
+GW -> DM: 2 query
+DM <--> IDE
+GW <-- DM: 3 ask_info+reply:蒙牛牛奶 是否下单
+GW --> X1: 4 reply
+X1 -> GW: 5 下单
+GW -> DM: 6 query
+DM <--> IDE
+DM --> GW: 7 toInvokePay
+GW -->GW: 8 验证码 + 声纹支付流程
+note right: 上下文记录验证码 \n wakeupType:voicePrint
+GW --> X1: 验证码
+X1 -> GW: 9 uploadSpeech voicePrint
+X1 -> GW: 9 "天猫精灵+验证码"
+GW -> GW: 10 身份识别+验证码核对
+note right:"天猫精灵"查找声纹 \n "验证码"进行对比
+GW -> DM: 11 query:支和付支和付+通过验证
+
+@enduml
+
+
+@startuml
+title : 图兰朵购物流程
+==声纹==
+图兰朵 -> GW: 1 我要买牛奶
+GW -> DM: 2 query
+DM <--> 购物领域
+GW <-- DM: 3.1 ask_info+reply:蒙牛 伊利 买第几个？
+note left: 导航页 + 搜索列表页的元数据
+GW -> APPServer: 3.2 裁剪中心
+note left: 输入参数是什么？
+GW <-- APPServer: URI
+图兰朵 <-- GW: 4 reply 买第几个？
+note left: 图兰朵列表页 \n导航页
+图兰朵 -> GW: 5 selectList 第二个
+GW -> DM: 6 selectList 第二个
+DM -> DM: 7.1 模糊匹配
+DM -> DM: 7.2 匹配失败跳出
+GW <-- DM: index:2
+图兰朵 <-- DM: index:2
+图兰朵 -> APPServer: 8 模拟点击 index:2  拉取详情
+图兰朵 <-- APPServer: 8.1 展示订单详情 请确认后下单？
+note left: 页面详情页 \n 1 端上怎么播放语音？ \n 2 怎么打开麦克风？
+图兰朵 -> GW:9.1 下单 selectList
+GW <-> DM:9.2  下单 selectList
+图兰朵 <-- GW:9.3 下单
+图兰朵 -> APPServer: 9.4 下单
+note left:模拟点击
+购物领域 <- APPServer: 9.5 下单 index:2
+购物领域 --> APPServer: 10 生成订单 二维码
+GW <- APPServer: 11 进入支付流程
+GW --> APPServer: 12 声纹码（显示）
+图兰朵 <- GW: 13 "天猫精灵 1234"
+图兰朵 --> GW: 14 "天猫精灵 1234" + 对应的意图
+note right:"天猫精灵"查找声纹 \n "验证码"进行对比
+GW -> DM: 15 query:支和付支和付+通过验证
+
+== 扫码 ==
+APPServer -> 购物领域:1 查询二维码
+APPServer -> 购物领域:2 轮训结果
+图兰朵 <-- APPServer: 3 支付t通知
+
+@enduml
+
+
+@startuml
+title : 图兰朵声纹购 调用流程图（端上控制）
+图兰朵 ->
+note left:支付的页面
+图兰朵 -> GW:1 调用网关进入支付流程
+GW -> GW: VPPAY
+note right:支付流程标识
+图兰朵 <-- GW: 1.1 声纹code
+图兰朵 -> GW: 2 拉取tts播报
+图兰朵 -> 图兰朵:2.1 开麦
+图兰朵 -> GW: uploadSpeech "天猫精灵 1234"
+图兰朵 ->  GW: 3 textRcognize(voiceprint) "天猫精灵 1234"
+GW -> GW: 3.1 code验证
+GW -> GW: 3.2 声纹验证
+GW -> IDE: 验证通过
+GW -> GW: 3.3 一次验证失败
+note right: 一次验证失败
+图兰朵 <-- GW: 3.4 验证失败 重试"天猫精灵 1234" 云端开麦
+图兰朵 -> GW: 4.1 uploadSpeech "天猫精灵 1234"
+图兰朵 -> GW: 4.2 textRecoginze(voiceprint) "天猫精灵 1234"
+GW -> GW: 4.3 code验证
+GW -> GW: 4.4 声纹验证
+GW -> IDE: 验证结果
+note right:\n/**验证通过并进行支付*/success,\n/**退出声纹支付*/exit,\n/**陌生人*/fail_stranger,\n/**无支付权限*/fail_noright,\n/**支付验证失败*/fail_verify,\n/**账号未创建成员*/fail_nomember
+图兰朵 <-- GW: 4.5 reply
+
+@enduml
+
+
+@startuml
+title : 图兰朵声纹购 调用流程图（appServer触发）
+图兰朵 ->
+GW <- APPServer: 1 调用网关进入支付流程
+GW --> APPServer: 1.1 "天猫精灵 1234"
+图兰朵 <- GW:1.2 "跟着我说 天猫精灵 1234"
+图兰朵 <- APPServer:1.3 默认展示 "天猫精灵 1234"
+图兰朵 -> GW:2 "天猫精灵 1234"
+note left: payload \n{domainKey,\ndomainDirectType}
+note right:领域直达,购物完成
+...超时关麦 ...
+图兰朵 -> APPServer:
+图兰朵 -> APPServer: 3
+GW -> DM: 2 query
+DM <--> 购物领域
+GW <-- DM: 3.1 ask_info+reply:蒙牛 伊利 买第几个？
+note left: 导航页 + 搜索列表页的元数据
+GW -> APPServer: 3.2 裁剪中心
+note left: 输入参数是什么？
+GW <-- APPServer: URI
+图兰朵 <-- GW: 4 reply 买第几个？
+note left: 图兰朵列表页 \n导航页
+图兰朵 -> GW: 5 selectList 第二
+
+@enduml
+
+
+
+@startuml
+title : 图兰朵 声纹购流程图
+(*)  --> "声纹支付"
+(*)  --> "扫码支付"
+
+--> " "
+--> [neiron]" "
+If "是否超过1次失败" then
+--> [Yes] "异步上传到"
+--> "run command"
+else
+--> "run command"
+Endif
+-->(*)
+
+
+@enduml
+
+

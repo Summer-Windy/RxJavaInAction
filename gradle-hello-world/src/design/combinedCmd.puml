@@ -1,0 +1,48 @@
+@startuml
+skinparam backfroundColor #EEEBBB
+
+
+skinparam sequence {
+
+    ArrowColor DeepSkyBlue
+    ActorBorderColor blue
+    LifeLineBorderColor blue
+    LifeLineBackgroundColor #A9DCDF
+
+    ParticipantBorderColor DeepSkyBlue
+    ParticipantBackgroundColor DodgerBlue
+    ParticipantFontName Aapex
+    ParticipantFontColor #A9DCDF
+
+    ActorBackgroundColor aqua
+    ActorFontColor DeepSkyBlue
+    ActorFontSize 17
+    ActorFontName Aapex
+}
+
+
+title: 组合指令逻辑
+
+==多之指令执行==
+X1 -> GW: 汇总天气\nstart
+GW -> Coin:
+Coin --> GW:组合指令  customerAction:{1,2,3} 一对多的指令
+GW -> GW:set:ConnectionContext.combinedCmd\nCombinedCmdHandlerHelper.doCombinedCmd()
+GW -> Coin: 1杭州天气
+GW --> X1: 1response
+X1 -> GW: A\n1player.feedback(不等于interrupt) Or\n2player.playDone Or\n3player.playerChanged(finish)
+GW -> GW: B CombinedCmdHandlerHelper.empty()
+GW -> Coin: 2绍兴天气
+GW --> X1: 2response
+X1 -> GW:A同上
+GW -> GW:B同上
+GW -> Coin: 3宁波天气
+GW --> X1:  3response
+GW -> GW:conCtx.combinedCmdList为空\nend
+
+==打断逻辑==
+X1 -> GW:非A
+GW -> GW:conCtx.combinedCmdList 清空
+GW -> Coin: 执行nlu
+GW --> X1:response
+@enduml

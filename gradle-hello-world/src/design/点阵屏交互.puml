@@ -1,0 +1,50 @@
+@startuml
+participant "C2" as X1 order 1
+participant GW order 2
+participant DM order 20
+participant "IDE" as IDE order 30
+participant "DSP" as Verify order 35
+participant UICenter order 31
+title : 点阵屏-请求交互流程
+X1 -> GW:天气
+GW -> DM:天气(featureList {dotMatrixDisplay:1})
+DM -> IDE:天气(featureList {dotMatrixDisplay:1})
+IDE -> Verify : 天气(featureList {dotMatrixDisplay:1})
+ref over Verify
+    根据点阵屏做逻辑处理
+end ref
+IDE <- Verify : reply + DotMatrixDisplay.Render(14℃ 大风 雷阵雨)
+ref over IDE
+    AliGenie.DotMatrixDisplay调用UICenter
+end ref
+create UICenter
+IDE -> UICenter : 指令模板数据
+ref over UICenter
+    1 根据dotPageType，生成对应的模板数据
+end ref
+IDE <- UICenter : reply + 点阵屏指令
+DM <- IDE : reply + 点阵屏指令
+GW <- DM : reply + 点阵屏指令
+ref over GW
+    1 1.0转为 3.0协议转换
+end ref
+X1 <- GW : reply + 点阵屏指令
+@enduml
+
+
+
+@startuml
+participant "C2" as X1 order 1
+participant GW order 2
+participant UICenter order 31
+participant "推送" as Operation order 36
+title : 点阵屏-推送交互流程
+ref over Operation
+    推送留言信息、推送运营活动
+end ref
+Operation -> UICenter : 指令 + renderData
+Operation <- UICenter : 指令 + 渲染指令
+GW <- Operation : 指令 + 渲染指令
+X1 <- GW : 指令 + 渲染指令
+
+@enduml

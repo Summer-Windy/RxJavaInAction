@@ -1,0 +1,38 @@
+@startuml
+actor  "音箱" as order1 order 1
+participant "网关" as order2 order 2
+participant "积木台" as  order3 order 3
+participant "TurandotApp" as  order4 order 4
+
+title : 统一网关-MTOP迁移
+note left order1
+    带屏产品的MTOP接口。
+    从H2网关、WSS网关都可以使用
+end note
+ref over order1
+    影响发起请求
+end ref
+order1 -> order2 : 1 MTOP请求
+activate order2
+order2 -> order3 : 2 MTOP元数据请求
+activate order2
+activate order3
+order3 ->  order3: 3.1 MTOP平台的数据;缓存MTOP映射数据
+order2 <-- order3 : 3 MTOP映射元数据
+deactivate order2
+deactivate order3
+order2 -> order2 : 4 1.泛化映射处理;2.ignore_authInfo;3.buildAuthInfo
+order2 -> order4 : 5 泛化调用业务系统
+activate order2
+activate order4
+order2 <-- order4 : 6 MTOP数据
+deactivate order2
+deactivate order4
+order2 <- order2 : 7 处理commands
+
+order1 <-- order2 : 8 commands
+deactivate order2
+ref over order1
+    屏幕渲染或者指令播放
+end ref
+@enduml

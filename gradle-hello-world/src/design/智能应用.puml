@@ -1,0 +1,73 @@
+@startuml
+skinparam backfroundColor #EEEBBB
+
+
+skinparam sequence {
+
+    ArrowColor DeepSkyBlue
+    ActorBorderColor blue
+    LifeLineBorderColor blue
+    LifeLineBackgroundColor #A9DCDF
+
+    ParticipantBorderColor DeepSkyBlue
+    ParticipantBackgroundColor DodgerBlue
+    ParticipantFontName Aapex
+    ParticipantFontColor #A9DCDF
+
+    ActorBackgroundColor aqua
+    ActorFontColor DeepSkyBlue
+    ActorFontSize 17
+    ActorFontName Aapex
+}
+actor  "手淘app" as order02 order 0
+actor  "天猫精灵app" as order0 order 3
+participant  "APP-Server" as order00 order 5
+participant  "三方应用" as order01 order 6
+actor  "智能应用" as order1 order 10
+participant "用户中心" as order2 order 20
+participant "数据库" as  order3 order 30
+
+
+title : 智能应用流程图OAuth
+==天猫精灵：OAuth2.0授权管理==
+note left order1
+    1.配置OAuth2.0信息
+    2.配置手机号免密授权信息
+    3.配置查询用户昵称信息
+end note
+ref over order1
+    智能应用：能力申请 -> 账号服务配置
+end ref
+order1 -> order2 : 1 授权信息
+order2 -> order3 : 2 存入account_link表
+order0 -> order1 : 3 拉取三方服务列表
+order0 -> order01 : 4 授权申请
+order01 -> order01 : 5 用户授权
+order01 -> order2 : 6 回调 code
+order2 -> order01 : 7 根据code 获取 token
+order01 --> order2 : 8 access_token
+order2 -> order3 : 9 授权成功 存储到user_token_info表
+order0 <-- order2 : 10 绑定成功
+
+==手淘：手机号免密码授权 OAuth2.0==
+ref over order1
+    智能应用：能力申请 -> 手机号免密码授权
+end ref
+order1 -> order2 : 1 配置三方的手机号免密授权地址
+ref over order02
+    手淘：首页 -> 更多频道 -> 天猫精灵
+    -> 购买历史
+end ref
+order02 -> order2 : 2 通过手机号发起绑定
+order02 <-- order2 : 3 向手机发送验证码
+order02 -> order2 : 4 手机验证码
+order2 -> order01 : 5 手机号:换取code grant_type=mobile_exchange
+order01 --> order2 : 6 code
+order01 <- order2 : 7 根据code 获取 token
+order01 --> order2 : 8 access_token
+order2 -> order3: 9 授权成功 存储到user_token_info表
+order02 <-- order2 : 10 绑定成功
+
+==刷新token==
+order2 -> order2: refreshToken
+@enduml
